@@ -13,14 +13,21 @@
 
 ## Сборка и деплой образа
 
-Образ собирается из кросс-компилированного бинаря через target `release-default` штатного Dockerfile и публикуется в Nexus:
+Образ собирается из кросс-компилированного бинаря минимальным `Dockerfile.jd`
+(scratch + ca-certs) и публикуется в Nexus. Официальный `--target=release-default`
+в нашем контуре **не годится** — его `certbuild`-база
+`docker.mirror.hashicorp.services/alpine` с gvm25 недоступна; `Dockerfile.jd` берёт
+`alpine` из Docker Hub.
 
 ```bash
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/linux/amd64/vault-mcp-server ./cmd/vault-mcp-server
-docker build --target=release-default --platform=linux/amd64 \
-  --build-arg BIN_NAME=vault-mcp-server --build-arg PRODUCT_VERSION=0.2.0-jd-ro1 \
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" \
+  -o vault-mcp-server ./cmd/vault-mcp-server
+docker build -f Dockerfile.jd --platform=linux/amd64 \
   -t nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro1 .
 docker push nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro1
 ```
+
+Сборку удобно делать прямо на gvm25 (нативный amd64): залить `Dockerfile.jd` +
+бинарь и `docker build` — так и собран текущий `0.2.0-jd-ro1`.
 
 Схема тегов — `<upstream-версия>-jd-roN`, `N` растёт с каждой ревизией форка. Деплой: тег пиннован в `/var/docker/compose/mcp/docker-compose.yml` на gvm25 → `docker-compose pull && docker-compose up -d`.

@@ -1,0 +1,17 @@
+# JD-сборка read-only форка: минимальный образ из cross-compiled бинаря.
+# Официальный `--target=release-default` в нашем контуре не годится — его
+# certbuild-база `docker.mirror.hashicorp.services/alpine` недоступна с gvm25.
+# Здесь ca-certificates берём из Docker Hub alpine (доступен).
+#
+# Сборка (см. README-JD.md):
+#   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" \
+#     -o vault-mcp-server ./cmd/vault-mcp-server
+#   docker build -f Dockerfile.jd --platform=linux/amd64 -t <nexus-tag> .
+
+FROM alpine:3.22 AS certs
+RUN apk add --no-cache ca-certificates
+
+FROM scratch
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY vault-mcp-server /bin/vault-mcp-server
+CMD ["/bin/vault-mcp-server", "stdio"]
