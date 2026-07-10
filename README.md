@@ -1,5 +1,7 @@
 # <img src="public/images/Vault-LogoMark_onDark.svg" width="30" align="left" style="margin-right: 12px;"/> Vault MCP Server
 
+> **JD-форк**: read-only сборка для JD-инфры — два патча поверх upstream (метадата в `read_secret` + рабочий `ENABLE_VAULT_OPERATIONS`). Что изменено и как собирается образ — [README-JD.md](README-JD.md).
+
 The Vault MCP Server is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction)
 server implementation that provides integration with HashiCorp
 Vault for managing secrets and mounts. This server uses both stdio and StreamableHTTP
