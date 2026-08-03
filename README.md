@@ -275,6 +275,12 @@ Writes a secret to a KV mount in Vault.
 - `key`: The key name for the secret
 - `value`: The value to store
 
+#### write_secret_metadata
+Writes the custom metadata of a secret on a KV v2 mount, without creating a new version of the secret. Only the keys given are updated, the other metadata fields are left alone.
+- `mount`: The mount path of the secret engine
+- `path`: The full path of the secret
+- `custom_metadata`: The custom metadata keys to write, values are strings or null to remove a key
+
 #### read_secret
 Reads a secret from a KV mount in Vault.
 - `mount`: The mount path of the secret engine
