@@ -1,6 +1,6 @@
 # JD-форк vault-mcp-server
 
-Внутренний read-only форк [hashicorp/vault-mcp-server](https://github.com/hashicorp/vault-mcp-server) — из него собирается образ сервиса `mcp-vault` на [хосте MCP-коннекторов gvm25](https://jd-infra-docs.lpr.jet.msk.su/llm/mcp-hub/). База — upstream `main` (v0.2.0 + 40 коммитов), поверх — два патча; ветка `main` этого репозитория = база + оба патча.
+Внутренний read-only форк [hashicorp/vault-mcp-server](https://github.com/hashicorp/vault-mcp-server) — из него собирается образ сервиса `mcp-vault` на [хосте MCP-коннекторов gvm25](https://jd-infra-docs.lpr.jet.msk.su/llm/mcp-hub/). База — upstream `main` (v0.2.0 + 40 коммитов), поверх — три патча; ветка `main` этого репозитория = база + все три.
 
 ## Патчи
 
@@ -26,11 +26,11 @@
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" \
   -o vault-mcp-server ./cmd/vault-mcp-server
 docker build -f Dockerfile.jd --platform=linux/amd64 \
-  -t nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro1 .
-docker push nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro1
+  -t nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro2 .
+docker push nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro2
 ```
 
 Сборку удобно делать прямо на gvm25 (нативный amd64): залить `Dockerfile.jd` +
-бинарь и `docker build` — так и собран текущий `0.2.0-jd-ro1`.
+бинарь и `docker build` — так и собран текущий `0.2.0-jd-ro2`.
 
 Схема тегов — `<upstream-версия>-jd-roN`, `N` растёт с каждой ревизией форка. Деплой: тег пиннован в `/var/docker/compose/mcp/docker-compose.yml` на gvm25 → `docker-compose pull && docker-compose up -d`.
