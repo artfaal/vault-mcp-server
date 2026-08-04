@@ -1,6 +1,6 @@
 # JD-форк vault-mcp-server
 
-Внутренний read-only форк [hashicorp/vault-mcp-server](https://github.com/hashicorp/vault-mcp-server) — из него собирается образ сервиса `mcp-vault` на [хосте MCP-коннекторов gvm25](https://jd-infra-docs.lpr.jet.msk.su/llm/mcp-hub/). База — upstream `main` (v0.2.0 + 40 коммитов), поверх — четыре патча; ветка `main` этого репозитория = база + все четыре.
+Внутренний форк [hashicorp/vault-mcp-server](https://github.com/hashicorp/vault-mcp-server) — из него собирается образ сервиса `mcp-vault` на [хосте MCP-коннекторов gvm25](https://jd-infra-docs.lpr.jet.msk.su/llm/mcp-hub/), где он работает только на чтение: write-тулзы включает `ENABLE_VAULT_OPERATIONS=true`, а на gvm25 флаг не выставлен. База — upstream `main` (v0.2.0 + 40 коммитов), поверх — четыре патча; ветка `main` этого репозитория = база + все четыре.
 
 ## Патчи
 

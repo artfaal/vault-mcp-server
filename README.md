@@ -1,6 +1,6 @@
 # <img src="public/images/Vault-LogoMark_onDark.svg" width="30" align="left" style="margin-right: 12px;"/> Vault MCP Server
 
-> **JD-форк**: read-only сборка для JD-инфры — три патча поверх upstream (метадата в `read_secret`, рабочий `ENABLE_VAULT_OPERATIONS`, запись `custom_metadata`). Что изменено и как собирается образ — [README-JD.md](README-JD.md).
+> **JD-форк**: сборка для JD-инфры — четыре патча поверх upstream (метадата в `read_secret`, рабочий `ENABLE_VAULT_OPERATIONS`, запись `custom_metadata`, необязательный `key` у `delete_secret`). Без `ENABLE_VAULT_OPERATIONS=true` сборка работает только на чтение. Что изменено и как собирается образ — [README-JD.md](README-JD.md).
 
 The Vault MCP Server is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction)
 server implementation that provides integration with HashiCorp
