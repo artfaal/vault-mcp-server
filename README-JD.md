@@ -26,19 +26,22 @@
 ```bash
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" \
   -o vault-mcp-server ./cmd/vault-mcp-server
-docker build -f Dockerfile.jd --platform=linux/amd64 \
-  -t nexus.lpr.jet.msk.su:5008/jd-docker/vault-mcp-server:0.2.0-jd-ro2 .
-docker push nexus.lpr.jet.msk.su:5008/jd-docker/vault-mcp-server:0.2.0-jd-ro2
+scp vault-mcp-server Dockerfile.jd gvm25.lpr.jet.msk.su:/tmp/
+ssh gvm25.lpr.jet.msk.su 'cd /tmp && \
+  sudo docker build -f Dockerfile.jd \
+    -t nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro3 . && \
+  sudo docker push nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro3'
 ```
 
-Публикуют образ **только через `:5008`** — на `:5007` `docker push` упирается в
-`server gave HTTP response to HTTPS client`: порт `:5007` отдаёт образы только на чтение
-(подробнее — [Что хранится в Nexus](https://jd-infra-docs.lpr.jet.msk.su/servers/nexus/)).
-Оба порта ведут в один `jd-docker/*`, поэтому в `docker-compose.yml` на gvm25 тот же
-образ прописан через `:5007`. Пушить нужно с машины, где сделан `docker login nexus.lpr.jet.msk.su:5008`
-(учётка — Vault `ci_cd/integrations/nexus`).
+Кросс-компиляция идёт на макбуке, сборка и публикация образа — на gvm25: у него в
+`daemon.json` прописан `insecure-registries: nexus.lpr.jet.msk.su:5007`, а `docker login`
+к этому порту уже сделан под `root`, так что `push` проходит без подготовки. Именно так собраны
+`0.2.0-jd-ro2` и текущий `0.2.0-jd-ro3`.
 
-Сборку удобно делать прямо на gvm25 (нативный amd64): залить `Dockerfile.jd` +
-бинарь и `docker build` — так и собран текущий `0.2.0-jd-ro2`.
+С машины, где `:5007` не объявлен insecure (например, Docker Desktop на макбуке), `push` туда
+падает с `server gave HTTP response to HTTPS client` — там публикуют через `:5008`, предварительно
+сделав `docker login nexus.lpr.jet.msk.su:5008` (учётка — Vault `ci_cd/integrations/nexus`).
+Оба порта ведут в один `jd-docker/*`, различаются только точкой входа — подробнее в
+[Что хранится в Nexus](https://jd-infra-docs.lpr.jet.msk.su/servers/nexus/).
 
 Схема тегов — `<upstream-версия>-jd-roN`, `N` растёт с каждой ревизией форка. Деплой: тег закреплён в `/var/docker/compose/mcp/docker-compose.yml` на gvm25 → `docker-compose pull && docker-compose up -d`.
