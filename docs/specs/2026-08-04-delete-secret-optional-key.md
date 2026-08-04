@@ -35,7 +35,8 @@
 1. Вызов без `key` удаляет секрет целиком и отвечает успехом — проверено тестом
    `TestDeleteSecretHandler_OmittedKeyDeletesWholeSecretV2` на моке Vault: в
    результате нет ошибки, а мок фиксирует факт удаления.
-2. `key: null` и `key: ""` ведут себя так же, как отсутствующий параметр.
+2. `key: null` и `key: ""` ведут себя так же, как отсутствующий параметр; явный
+   `null` проверен тестом `TestDeleteSecretHandler_NullKeyDeletesWholeSecretV2`.
 3. `key` не строка — ошибка с явным текстом про ожидаемый тип, запроса в Vault
    нет: `TestDeleteSecretHandler_NonStringKeyIsRejected`.
 4. Текст ошибки больше не говорит `Missing` — параметр необязательный, и
