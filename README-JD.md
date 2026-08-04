@@ -1,6 +1,6 @@
 # JD-форк vault-mcp-server
 
-Внутренний форк [hashicorp/vault-mcp-server](https://github.com/hashicorp/vault-mcp-server) — из него собирается образ сервиса `mcp-vault` на [хосте MCP-коннекторов gvm25](https://jd-infra-docs.lpr.jet.msk.su/llm/mcp-hub/), где он работает только на чтение: write-тулзы включает `ENABLE_VAULT_OPERATIONS=true`, а на gvm25 флаг не выставлен. База — upstream `main` (v0.2.0 + 40 коммитов), поверх — четыре патча; ветка `main` этого репозитория = база + все четыре.
+Внутренний форк [hashicorp/vault-mcp-server](https://github.com/hashicorp/vault-mcp-server) — из него собирается образ сервиса `mcp-vault`, который на [хосте MCP-коннекторов gvm25](https://jd-infra-docs.lpr.jet.msk.su/llm/mcp-hub/) работает только на чтение: write-тулзы регистрируются при `ENABLE_VAULT_OPERATIONS=true`, а на gvm25 флаг не выставлен. База — upstream `main` (v0.2.0 + 40 коммитов), поверх — четыре патча; ветка `main` этого репозитория = база + все четыре.
 
 ## Патчи
 
@@ -27,9 +27,16 @@
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" \
   -o vault-mcp-server ./cmd/vault-mcp-server
 docker build -f Dockerfile.jd --platform=linux/amd64 \
-  -t nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro2 .
-docker push nexus.lpr.jet.msk.su:5007/jd-docker/vault-mcp-server:0.2.0-jd-ro2
+  -t nexus.lpr.jet.msk.su:5008/jd-docker/vault-mcp-server:0.2.0-jd-ro2 .
+docker push nexus.lpr.jet.msk.su:5008/jd-docker/vault-mcp-server:0.2.0-jd-ro2
 ```
+
+Публикуют образ **только через `:5008`** — на `:5007` `docker push` упирается в
+`server gave HTTP response to HTTPS client`: порт `:5007` отдаёт образы только на чтение
+(подробнее — [Что хранится в Nexus](https://jd-infra-docs.lpr.jet.msk.su/servers/nexus/)).
+Оба порта ведут в один `jd-docker/*`, поэтому в `docker-compose.yml` на gvm25 тот же
+образ прописан через `:5007`. Пушить нужно с машины, где сделан `docker login nexus.lpr.jet.msk.su:5008`
+(учётка — Vault `ci_cd/integrations/nexus`).
 
 Сборку удобно делать прямо на gvm25 (нативный amd64): залить `Dockerfile.jd` +
 бинарь и `docker build` — так и собран текущий `0.2.0-jd-ro2`.
