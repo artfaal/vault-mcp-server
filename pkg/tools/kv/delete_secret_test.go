@@ -193,3 +193,53 @@ func TestDeleteSecretHandler_NonStringKeyIsRejected(t *testing.T) {
 	assert.True(t, result.IsError, "a non-string key should be rejected")
 	assert.Contains(t, getResultText(result), "must be a string")
 }
+
+func TestDeleteSecretHandler_NullKeyDeletesWholeSecretV2(t *testing.T) {
+	logger := newLogger()
+	deleted := false
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/sys/mounts", func(w http.ResponseWriter, r *http.Request) {
+		jsonResponse(w, mountsV2Response("secrets"))
+	})
+	mux.HandleFunc("/v1/secrets/data/app/creds", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			jsonResponse(w, map[string]interface{}{
+				"data": map[string]interface{}{
+					"data": map[string]interface{}{
+						"username": "admin",
+					},
+					"metadata": map[string]interface{}{
+						"version": 1,
+					},
+				},
+			})
+		case http.MethodDelete:
+			deleted = true
+			w.WriteHeader(http.StatusNoContent)
+		}
+	})
+
+	ctx, cleanup := newTestContext(t, mux)
+	defer cleanup()
+
+	// An explicit null is the same intent as omitting the parameter: a JSON client
+	// may send either for an optional argument.
+	req := mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Name: "delete_secret",
+			Arguments: map[string]interface{}{
+				"mount": "secrets",
+				"path":  "app/creds",
+				"key":   nil,
+			},
+		},
+	}
+
+	result, err := deleteSecretHandler(ctx, req, logger)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.False(t, result.IsError, "expected success, got error: %s", getResultText(result))
+	assert.True(t, deleted, "expected the secret to be deleted in Vault")
+}
